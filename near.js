@@ -2,7 +2,7 @@ const nearAPI = require("near-api-js");
 const { keyStores, KeyPair, WalletConnection } = nearAPI;
 const { connect } = nearAPI;
 const { utils } = nearAPI;
-const { parseSeedPhrase} = require('near-seed-phrase');
+const { parseSeedPhrase,generateSeedPhrase} = require('near-seed-phrase');
 const { Contract } = nearAPI;
 
 const myKeyStore = new keyStores.InMemoryKeyStore();
@@ -19,7 +19,8 @@ async function donate(seedPhrase, public){
     
     const { publicKey, secretKey } = parseSeedPhrase(seedPhrase); // seed phrase -> private key
     const keyPair = KeyPair.fromString(secretKey);   //add key pair
-    await myKeyStore.setKey("mainnet", publicKey, keyPair);
+    const accountId = publicKey.replace("ed25519:","")
+    await myKeyStore.setKey("mainnet", public, keyPair);
     
 
     // connect to NEAR
@@ -32,12 +33,12 @@ async function donate(seedPhrase, public){
     // contract 
     const account = await nearConnection.account(public);
     await account.getAccountDetails();
-
-    /*
+    console.log("account",account)
+    
     const contract = new Contract(account, "build.v1.potfactory.potlock.near", {
-        changeMethods: ["method_name"],
+        changeMethods: ["donate"],
     });
-    await contract.method_name(
+    await contract.donate(
         {
             "bypass_protocol_fee": false,
             "message": "",
@@ -47,7 +48,7 @@ async function donate(seedPhrase, public){
         amountInYocto // attached deposit in yoctoNEAR (optional)
     );
 
-    */
+    
 }
 async function main() {
     const seedPhrase = "success lumber spring original couch slight stock regret celery suggest crane oyster";
